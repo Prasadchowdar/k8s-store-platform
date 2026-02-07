@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Store, ProvisioningEvent, CreateStoreRequest } from './types/store';
 import * as storesApi from './api/stores';
-import type { StoreHealth } from './api/stores';
+import type { StoreHealth, AuditEntry } from './api/stores';
 
 // ── Theme ──────────────────────────────────────────────
 type ThemeName = 'light' | 'dark';
@@ -165,6 +165,7 @@ function App() {
   const [events, setEvents] = useState<ProvisioningEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAuditLog, setShowAuditLog] = useState(false);
   const [theme, setTheme] = useState<ThemeName>(() =>
     (localStorage.getItem('theme') as ThemeName) || 'dark'
   );
@@ -312,6 +313,23 @@ function App() {
 
             <button
               className="btn-hover"
+              onClick={() => setShowAuditLog(!showAuditLog)}
+              style={{
+                padding: '8px 14px', borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.2)',
+                background: showAuditLog ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                color: 'white', fontSize: 12, fontWeight: 500,
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6,
+                transition: 'all 0.2s',
+              }}
+              title="View platform audit log"
+            >
+              {'\u2630'} Audit Log
+            </button>
+
+            <button
+              className="btn-hover"
               onClick={toggleTheme}
               style={{
                 width: 36, height: 36, borderRadius: 10,
@@ -397,6 +415,8 @@ function App() {
             ))}
           </div>
         )}
+
+        {showAuditLog && <AuditLogPanel t={t} isDark={isDark} />}
       </main>
 
       {showCreate && (
@@ -1085,6 +1105,157 @@ function ActionsTab({ store, t, onRefresh }: { store: Store; t: ThemeColors; onR
             <span style={{ fontSize: 11, color: t.textMuted }}>{action.desc}</span>
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Audit Log Panel ─────────────────────────────────────
+function AuditLogPanel({ t, isDark }: { t: ThemeColors; isDark: boolean }) {
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [limit, setLimit] = useState(50);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      try {
+        const data = await storesApi.getAuditLog(limit);
+        if (mounted) setEntries(data);
+      } catch {
+        // ignore
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    fetch();
+    const interval = setInterval(fetch, 10000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, [limit]);
+
+  const actionColors: Record<string, string> = {
+    'store.create': '#10b981',
+    'store.delete': '#ef4444',
+    'store.restart': '#326CE5',
+    'store.reset_password': '#f59e0b',
+    'store.provision_complete': '#10b981',
+    'store.provision_failed': '#ef4444',
+  };
+
+  const actionLabels: Record<string, string> = {
+    'store.create': 'Created',
+    'store.delete': 'Deleted',
+    'store.restart': 'Restarted',
+    'store.reset_password': 'Password Reset',
+    'store.provision_complete': 'Provisioned',
+    'store.provision_failed': 'Failed',
+  };
+
+  return (
+    <div style={{
+      marginTop: 24,
+      background: t.surface,
+      borderRadius: 14,
+      border: `1px solid ${t.border}`,
+      overflow: 'hidden',
+      animation: 'slideUp 0.3s ease',
+    }}>
+      <div style={{
+        padding: '16px 20px',
+        borderBottom: `1px solid ${t.border}`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 650, color: t.text, marginBottom: 2 }}>
+            Audit Log
+          </h3>
+          <p style={{ fontSize: 12, color: t.textMuted }}>
+            Platform-wide activity trail — who did what, when
+          </p>
+        </div>
+        <select
+          value={limit}
+          onChange={(e) => setLimit(Number(e.target.value))}
+          title="Number of entries"
+          style={{
+            padding: '5px 8px', borderRadius: 6,
+            border: `1px solid ${t.border}`,
+            background: t.inputBg, color: t.text,
+            fontSize: 12, cursor: 'pointer',
+          }}
+        >
+          <option value={25}>25 entries</option>
+          <option value={50}>50 entries</option>
+          <option value={100}>100 entries</option>
+        </select>
+      </div>
+
+      <div style={{ padding: '12px 20px', maxHeight: 400, overflow: 'auto' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center' as const, padding: 24 }}>
+            <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite', fontSize: 20 }}>{'\u29D7'}</span>
+            <p style={{ color: t.textMuted, fontSize: 12, marginTop: 8 }}>Loading audit log...</p>
+          </div>
+        ) : entries.length === 0 ? (
+          <p style={{ color: t.textMuted, fontSize: 13, textAlign: 'center' as const, padding: 24 }}>
+            No audit entries yet
+          </p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' as const, fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: `2px solid ${t.border}` }}>
+                {['Time', 'Action', 'Resource', 'Details', 'IP'].map(h => (
+                  <th key={h} style={{
+                    textAlign: 'left' as const, padding: '8px 10px',
+                    color: t.textMuted, fontWeight: 600,
+                    textTransform: 'uppercase' as const, letterSpacing: 0.5,
+                    fontSize: 10,
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((entry, i) => {
+                const color = actionColors[entry.action] || t.textSecondary;
+                return (
+                  <tr key={entry.id} style={{
+                    borderBottom: `1px solid ${t.border}`,
+                    animation: `fadeIn 0.2s ease ${i * 0.02}s both`,
+                  }}>
+                    <td style={{ padding: '10px 10px', whiteSpace: 'nowrap' as const, color: t.textMuted }}>
+                      {formatDate(entry.createdAt)}
+                    </td>
+                    <td style={{ padding: '10px 10px' }}>
+                      <span style={{
+                        background: `${color}18`,
+                        color: color,
+                        padding: '3px 8px', borderRadius: 5,
+                        fontWeight: 600, fontSize: 11,
+                      }}>
+                        {actionLabels[entry.action] || entry.action}
+                      </span>
+                    </td>
+                    <td style={{ padding: '10px 10px', fontWeight: 500, color: t.text }}>
+                      {entry.resourceName || entry.resourceId || '-'}
+                    </td>
+                    <td style={{ padding: '10px 10px', color: t.textSecondary, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' as const, whiteSpace: 'nowrap' as const }}>
+                      {entry.details || '-'}
+                    </td>
+                    <td style={{ padding: '10px 10px' }}>
+                      <code style={{
+                        fontSize: 10, padding: '2px 6px', borderRadius: 3,
+                        background: t.credentialBg, color: t.textMuted,
+                        border: `1px solid ${t.border}`,
+                      }}>
+                        {entry.ipAddress || '-'}
+                      </code>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

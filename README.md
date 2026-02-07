@@ -44,6 +44,44 @@ A Kubernetes-native platform for provisioning and managing isolated e-commerce s
 | Ingress | NGINX Ingress Controller + nip.io wildcard DNS |
 | Packaging | Helm 3 charts with values-local / values-prod |
 
+## Screenshots
+
+### Dashboard (Light Mode) - Multiple Stores with Provisioning Queue
+![Dashboard Light](docs/screenshots/01-dashboard-light-provisioning.png)
+
+### Dashboard (Dark Mode) - Multiple Stores Ready
+![Dashboard Dark](docs/screenshots/02-dashboard-dark-multiple-stores.png)
+
+### Provisioning Timeline - Step-by-Step Progress
+![Timeline](docs/screenshots/03-timeline-provisioning-steps.png)
+
+### Health Tab - Pod Metrics, Storage, Resource Quota
+![Health](docs/screenshots/04-health-tab-pod-metrics.png)
+
+### Logs Tab - Real-time Pod Log Viewer
+![Logs](docs/screenshots/05-logs-tab-realtime.png)
+
+### Actions Tab - Restart Pods, Reset Password
+![Actions](docs/screenshots/06-actions-tab.png)
+
+### WooCommerce Store - Shop Page with Product
+![Shop](docs/screenshots/08-woocommerce-shop.png)
+
+### Shopping Cart
+![Cart](docs/screenshots/10-cart-page.png)
+
+### Checkout Page (Cash on Delivery)
+![Checkout](docs/screenshots/11-checkout-page.png)
+
+### Order Received - Confirmation
+![Order Received](docs/screenshots/12-order-received.png)
+
+### WordPress Admin Login
+![WP Login](docs/screenshots/13-wp-admin-login.png)
+
+### WooCommerce Admin - Orders List
+![WC Orders](docs/screenshots/15-woocommerce-orders.png)
+
 ## Prerequisites
 
 - **Docker Desktop** with WSL2/Hyper-V backend
@@ -142,6 +180,7 @@ make clean      # Teardown + remove images
 | **Health Monitoring** | Pod metrics (uptime, restarts, CPU/memory), PVC info, resource quota usage |
 | **Real-time Pod Logs** | Terminal-style log viewer with pod selector and auto-refresh |
 | **One-Click Actions** | Restart pods (all/wordpress/mysql), reset admin password |
+| **Audit Log** | Platform-wide activity trail with action, resource, IP address, timestamps |
 | **Dark/Light Mode** | Theme toggle with persistent preference |
 | **Exact Timestamps** | Store creation time with relative display (e.g., "Sat, Feb 7, 7:36 PM (2h ago)") |
 
