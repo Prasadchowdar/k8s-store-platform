@@ -1,0 +1,35 @@
+store:
+  slug: "example-store"
+  name: "Example Store"
+  adminEmail: "admin@example.com"
+  domain: "example-store.store.127.0.0.1.nip.io"
+
+mysql:
+  image: mysql:8.0
+  storageSize: 1Gi
+  storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+wordpress:
+  image: "wordpress:6.4-php8.2-apache"
+  storageSize: 1Gi
+  storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+ingress:
+  className: nginx
+
+networkPolicy:
+  enabled: true

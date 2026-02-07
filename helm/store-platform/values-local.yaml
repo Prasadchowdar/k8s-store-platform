@@ -1,0 +1,28 @@
+global:
+  storeDomain: "store.127.0.0.1.nip.io"
+  platformDomain: "platform.127.0.0.1.nip.io"
+  imagePullPolicy: Never
+
+frontend:
+  image:
+    tag: local
+
+backend:
+  image:
+    tag: local
+  env:
+    NODE_ENV: development
+    LOG_LEVEL: debug
+    MYSQL_STORAGE_SIZE: "1Gi"
+    WORDPRESS_STORAGE_SIZE: "1Gi"
+    IMAGE_PULL_POLICY: "Never"
+    EXTERNAL_PORT: "8080"
+  persistence:
+    storageClass: standard
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi

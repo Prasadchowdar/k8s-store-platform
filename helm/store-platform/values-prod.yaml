@@ -1,0 +1,47 @@
+global:
+  storeDomain: "store.example.com"
+  platformDomain: "platform.example.com"
+  imageRegistry: "ghcr.io/yourorg/"
+  imagePullPolicy: Always
+
+frontend:
+  replicaCount: 2
+  image:
+    tag: "1.0.0"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+backend:
+  replicaCount: 1
+  image:
+    tag: "1.0.0"
+  env:
+    NODE_ENV: production
+    LOG_LEVEL: warn
+    PROVISIONING_CONCURRENCY: "5"
+    MYSQL_STORAGE_SIZE: "5Gi"
+    WORDPRESS_STORAGE_SIZE: "10Gi"
+    STORAGE_CLASS: "longhorn"
+  persistence:
+    size: 10Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+ingress:
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+    enabled: true
+    secretName: platform-tls

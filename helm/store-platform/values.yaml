@@ -1,0 +1,64 @@
+global:
+  storeDomain: "store.127.0.0.1.nip.io"
+  platformDomain: "platform.127.0.0.1.nip.io"
+  imageRegistry: ""
+  imagePullPolicy: IfNotPresent
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: store-platform-frontend
+    tag: local
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+backend:
+  replicaCount: 1
+  image:
+    repository: store-platform-backend
+    tag: local
+  service:
+    type: ClusterIP
+    port: 3000
+  env:
+    NODE_ENV: production
+    LOG_LEVEL: info
+    DB_PATH: /data/platform.db
+    PROVISIONING_CONCURRENCY: "3"
+    WOOCOMMERCE_INIT_TIMEOUT: "300"
+    MYSQL_IMAGE: "mysql:8.0"
+    WORDPRESS_IMAGE: "wordpress-store:latest"
+    IMAGE_PULL_POLICY: "IfNotPresent"
+    MYSQL_STORAGE_SIZE: "1Gi"
+    WORDPRESS_STORAGE_SIZE: "1Gi"
+    INGRESS_CLASS: "nginx"
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+    name: store-platform-backend
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  tls: {}

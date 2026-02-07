@@ -1,0 +1,18 @@
+====================================================
+  Store Platform has been deployed!
+====================================================
+
+Dashboard URL: http://{{ .Values.global.platformDomain }}
+
+Store URLs will follow the pattern:
+  http://<store-slug>.{{ .Values.global.storeDomain }}
+
+To create a store:
+  1. Open the dashboard
+  2. Click "Create New Store"
+  3. Fill in the details and click "Create"
+
+To check the status:
+  kubectl get pods -n {{ .Release.Namespace }}
+
+====================================================
