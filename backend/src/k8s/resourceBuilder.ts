@@ -285,6 +285,14 @@ php wp-cli.phar option update woocommerce_cod_settings '{"enabled":"yes","title"
 echo "Setting up WooCommerce pages..."
 php wp-cli.phar wc tool run install_pages --user=admin --allow-root --path=/var/www/html || true
 
+echo "Installing Storefront theme..."
+php wp-cli.phar theme install storefront --activate --allow-root --path=/var/www/html || true
+
+echo "Setting Shop page as homepage..."
+SHOP_ID=$(php wp-cli.phar post list --post_type=page --post_status=publish --name=shop --field=ID --allow-root --path=/var/www/html)
+php wp-cli.phar option update show_on_front page --allow-root --path=/var/www/html || true
+php wp-cli.phar option update page_on_front $SHOP_ID --allow-root --path=/var/www/html || true
+
 echo "WooCommerce setup complete!"
 `;
 

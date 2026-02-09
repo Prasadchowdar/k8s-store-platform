@@ -37,3 +37,13 @@ helm/store-platform/charts/
 
 # Windows artifacts
 nul
+
+# Exclude from submission
+INTERVIEW-GUIDE.md
+Makefile
+SETUP.md
+MY-NOTES.md
+debug.yaml
+fix_wp_url.sh
+wp_url_fix.php
+wp_ingress_fix.php

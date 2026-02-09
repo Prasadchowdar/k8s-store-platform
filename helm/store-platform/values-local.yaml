@@ -8,6 +8,7 @@ frontend:
     tag: local
 
 backend:
+  replicaCount: 1
   image:
     tag: local
   env:
@@ -15,8 +16,9 @@ backend:
     LOG_LEVEL: debug
     MYSQL_STORAGE_SIZE: "1Gi"
     WORDPRESS_STORAGE_SIZE: "1Gi"
-    IMAGE_PULL_POLICY: "Never"
-    EXTERNAL_PORT: "8080"
+    IMAGE_PULL_POLICY: "Always"
+    WORDPRESS_IMAGE: "wordpress:6.8"
+    EXTERNAL_PORT: "8090"
   persistence:
     storageClass: standard
   resources:
